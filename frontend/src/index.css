@@ -22,6 +22,52 @@
   h1, h2, h3, h4 {
     @apply font-display tracking-tight;
   }
+
+  button,
+  a,
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  button {
+    position: relative;
+    top: 0;
+    transition-property: background-color, border-color, color, opacity, box-shadow, filter, top;
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
+  }
+
+  button:disabled,
+  button[aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    button:not(:disabled):not([aria-disabled="true"]):hover {
+      top: -2px;
+      filter: brightness(1.06);
+      box-shadow: 0 12px 28px rgb(15 23 42 / 0.14);
+    }
+
+    button:not(:disabled):not([aria-disabled="true"]):active {
+      top: 0;
+      filter: brightness(0.98);
+      box-shadow: 0 6px 16px rgb(15 23 42 / 0.10);
+    }
+
+    nav button:not(:disabled):not([aria-disabled="true"]):hover,
+    nav button:not(:disabled):not([aria-disabled="true"]):active,
+    .map-marker-button:not(:disabled):not([aria-disabled="true"]):hover,
+    .map-marker-button:not(:disabled):not([aria-disabled="true"]):active {
+      filter: none;
+      box-shadow: none;
+    }
+
+    .map-marker-button:not(:disabled):not([aria-disabled="true"]):hover > div {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .shadow-clean {

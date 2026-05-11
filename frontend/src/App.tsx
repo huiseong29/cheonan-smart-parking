@@ -113,6 +113,57 @@ const slotTypeGuidance: Record<VehicleType, { title: string; description: string
   },
 };
 
+const eligibleSlotTypesByVehicle: Record<VehicleType, VehicleType[]> = {
+  GENERAL: ['GENERAL'],
+  ELECTRIC: ['ELECTRIC'],
+  DISABLED: ['DISABLED'],
+  PREGNANT: ['PREGNANT'],
+  WOMEN: ['WOMEN'],
+};
+
+const CHEONAN_NEWS = [
+  {
+    tag: 'EVENT',
+    title: '흥타령춤축제 주차장 무료 개방 안내',
+    date: '2026.05.20',
+    summary: '축제 기간 천안역 주변 공영주차장 일부가 무료 개방됩니다.',
+    location: '천안역 서부광장, 중앙시장 공영주차장',
+    detail: '흥타령춤축제 방문객 분산을 위해 행사 기간 주요 공영주차장의 일부 구역을 무료 개방합니다. 앱에서 행사 혼잡 예측 모드를 켜면 출차가 빠른 주차장을 우선 추천합니다.',
+    benefit: '방문객 QR 할인과 중복 적용 가능',
+    actionLabel: '행사 추천 주차장 보기',
+  },
+  {
+    tag: 'NOTICE',
+    title: '천안역 서부광장 스마트 정산기 교체 공사',
+    date: '2026.05.15',
+    summary: '정산기 교체 기간에도 하이패스형 자동결제는 정상 이용 가능합니다.',
+    location: '천안역 서부광장 주차장 B1, B2',
+    detail: '스마트 정산기 교체 작업으로 일부 현장 정산기 사용이 제한됩니다. 차량번호와 결제수단을 등록한 이용자는 출차 시 자동결제를 그대로 이용할 수 있습니다.',
+    benefit: '교체 기간 출차 유예 30분 유지',
+    actionLabel: '자동결제 등록 확인',
+  },
+  {
+    tag: 'CITY',
+    title: '천안시 청년 주차 지원 사업 신청 안내',
+    date: '2026.05.11',
+    summary: '청년 생활권 이동 지원을 위한 월 주차 할인 신청이 시작됩니다.',
+    location: '천안시 공영주차장 54개소',
+    detail: '천안시 거주 청년은 앱에서 본인인증 후 월 주차 할인 혜택을 신청할 수 있습니다. 승인된 할인은 결제 화면에 자동 반영됩니다.',
+    benefit: '월 최대 12,000원 주차 할인',
+    actionLabel: '지원 혜택 확인',
+  },
+  {
+    tag: 'NEW',
+    title: '불당동 스마트 타워 신규 스팟 오픈',
+    date: '2026.05.08',
+    summary: '전기차 충전면과 여성전용면을 포함한 신규 연계 주차장이 추가되었습니다.',
+    location: '불당동 스마트 타워',
+    detail: '불당동 생활권 주차 수요를 분산하기 위해 신규 연계 주차장이 앱에 추가되었습니다. 층별 실내 지도와 전기차 충전 가능 여부를 함께 확인할 수 있습니다.',
+    benefit: '오픈 기념 첫 결제 1,000원 할인',
+    actionLabel: '신규 주차장 보기',
+  },
+];
+
 // --- Sub-components (extracted for optimization) ---
 
 const CheonanMapBackground = () => (
@@ -222,7 +273,7 @@ const MapMarker = memo(({
     initial={{ scale: 0 }}
     animate={{ scale: 1 }}
     onClick={onClick}
-    className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+    className="map-marker-button absolute z-10 -translate-x-1/2 -translate-y-1/2"
     style={{ left: `${facility.coords.x}%`, top: `${facility.coords.y}%` }}
   >
     <div className={`
@@ -413,6 +464,8 @@ export default function App() {
   const [isPaying, setIsPaying] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'none' | 'confirm' | 'complete'>('none');
   const [appliedBenefit, setAppliedBenefit] = useState<{ label: string; amount: number } | null>(null);
+  const [recommendationNotice, setRecommendationNotice] = useState<string | null>(null);
+  const [selectedNews, setSelectedNews] = useState<typeof CHEONAN_NEWS[number] | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [exitTimer, setExitTimer] = useState(1800); // 30 mins
 
@@ -457,9 +510,7 @@ export default function App() {
       case '임산부':
         return result.filter(f => f.slots.some(s => s.type === 'PREGNANT'));
       case '빈자리':
-        return result.filter(f => f.emptySpaces > 0);
-      case '빈자리 많은': 
-        return [...result].sort((a, b) => b.emptySpaces - a.emptySpaces);
+        return result.filter(f => f.emptySpaces > 0).sort((a, b) => b.emptySpaces - a.emptySpaces);
       default: 
         return result;
     }
@@ -489,8 +540,28 @@ export default function App() {
   const transformRef = useRef<any>(null);
 
   // --- Handlers ---
+  const handleFindNearestSlot = () => {
+    if (!selectedFacility) return;
+    const eligibleTypes = eligibleSlotTypesByVehicle[vehicle.type];
+    const nearest = selectedFacility.slots.find(slot =>
+      slot.floor === activeFloor &&
+      !slot.isOccupied &&
+      eligibleTypes.includes(slot.type)
+    );
+
+    if (nearest) {
+      setPendingSlotId(nearest.id);
+      setRecommendationNotice(`${slotTypeGuidance[vehicle.type].title} 기준으로 가장 가까운 빈자리를 추천했습니다.`);
+      return;
+    }
+
+    setPendingSlotId(null);
+    setRecommendationNotice(`${activeFloor}에는 ${slotTypeGuidance[vehicle.type].title} 빈자리가 없습니다. 다른 층을 확인해 주세요.`);
+  };
+
   const handleSelectFacility = (f: ParkingFacility) => {
     setSelectedFacility(f);
+    setRecommendationNotice(null);
     if (!f.slots.some(s => s.floor === activeFloor)) {
       setActiveFloor(f.slots[0]?.floor || '1F');
     }
@@ -624,13 +695,13 @@ export default function App() {
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {['전체', '가까운주차장', '공영', '사설', '전기차', '장애인', '여성전용', '임산부', '빈자리', '빈자리 많은'].map(filter => (
+            {['전체', '가까운주차장', '공영', '사설', '전기차', '장애인', '여성전용', '임산부', '빈자리'].map(filter => (
               <button 
                 key={filter} 
                 onClick={() => setActiveFilter(filter)}
                 className={`whitespace-nowrap px-4 py-2 border rounded-full text-[10px] font-black shadow-sm transition-all active:scale-95 ${activeFilter === filter ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white/95 backdrop-blur-md border-slate-100 text-slate-600'}`}
               >
-                {filter === '빈자리 많은' ? '빈자리 많은 주차장' : filter}
+                {filter === '빈자리' ? '빈자리 있는 주차장' : filter}
               </button>
             ))}
           </div>
@@ -735,17 +806,27 @@ export default function App() {
            <div className="space-y-6 pt-10">
              <header className="flex justify-between items-end px-2">
                 <h3 className="text-xl font-black">천안 소식</h3>
-                <span className="text-[10px] font-black text-blue-600">전체 보기</span>
+                <button
+                  onClick={() => setSelectedNews(CHEONAN_NEWS[0])}
+                  className="text-[10px] font-black text-blue-600 px-2 py-1 rounded-lg"
+                >
+                  최신 소식 보기
+                </button>
              </header>
              <div className="grid gap-4">
-                {MOCK_NEWS.map((news, i) => (
-                  <div key={i} className="bg-white p-5 rounded-3xl border border-slate-100 flex gap-4 items-center">
-                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-[8px] font-black text-slate-400">{news.tag}</div>
+                {CHEONAN_NEWS.map((news) => (
+                  <button
+                    key={news.title}
+                    onClick={() => setSelectedNews(news)}
+                    className="w-full text-left bg-white p-5 rounded-3xl border border-slate-100 flex gap-4 items-center group active:scale-[0.98] transition-all"
+                  >
+                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-[8px] font-black text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 flex-shrink-0">{news.tag}</div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-black text-slate-800 truncate mb-1">{news.title}</p>
-                      <p className="text-[10px] font-bold text-slate-400">{news.date}</p>
+                      <p className="text-[10px] font-bold text-slate-400 truncate">{news.date} · {news.summary}</p>
                     </div>
-                  </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 flex-shrink-0" />
+                  </button>
                 ))}
              </div>
            </div>
@@ -1161,6 +1242,70 @@ export default function App() {
           </motion.div>
         )}
 
+        {selectedNews && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedNews(null)}
+            className="fixed inset-0 z-[270] bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ y: 40, scale: 0.98 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 40, scale: 0.98 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-white rounded-[32px] p-6 sm:p-8 shadow-2xl space-y-6"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 min-w-0">
+                  <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                    <Info className="w-7 h-7" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-blue-600 tracking-widest mb-2">{selectedNews.tag}</p>
+                    <h3 className="text-xl font-black text-slate-900 leading-tight">{selectedNews.title}</h3>
+                    <p className="text-xs font-bold text-slate-400 mt-2">{selectedNews.date}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedNews(null)}
+                  className="w-10 h-10 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 flex-shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <p className="text-sm font-black text-slate-900 mb-2">{selectedNews.summary}</p>
+                <p className="text-sm font-bold text-slate-600 leading-relaxed">{selectedNews.detail}</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <div className="bg-white border border-slate-100 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-slate-400 mb-1">대상 장소</p>
+                  <p className="text-sm font-black text-slate-900">{selectedNews.location}</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-emerald-500 mb-1">연계 혜택</p>
+                  <p className="text-sm font-black text-emerald-800">{selectedNews.benefit}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setSelectedNews(null);
+                  setActiveTab(selectedNews.tag === 'NOTICE' ? 'profile' : 'home');
+                  setViewState('discovery');
+                }}
+                className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl tracking-widest shadow-xl"
+              >
+                {selectedNews.actionLabel}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+
         {paymentStep === 'confirm' && (
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="fixed inset-0 z-[250] bg-white flex flex-col p-6 sm:p-10">
              <div className="flex justify-between items-center mb-8 sm:mb-12">
@@ -1294,19 +1439,41 @@ export default function App() {
              <div className="flex px-6 justify-between items-center mb-4">
                 <h3 className="text-sm font-black text-slate-400 tracking-widest">{activeFloor} 층별 지도</h3>
                 <button 
-                  onClick={() => {
-                    const nearest = selectedFacility.slots.find(s => s.floor === activeFloor && !s.isOccupied);
-                    if (nearest) setPendingSlotId(nearest.id);
-                  }}
+                  onClick={handleFindNearestSlot}
                   className="bg-emerald-600 text-white px-4 py-2 rounded-2xl text-[10px] font-black shadow-lg shadow-emerald-100 flex items-center gap-2 active:scale-95 transition-transform"
                 >
                   <Navigation className="w-3 h-3" /> 가장 가까운 자리 찾기
                 </button>
              </div>
 
+             <div className="mx-6 mb-4 overflow-x-auto no-scrollbar">
+                <div className="min-w-max flex items-center gap-2">
+                  <span className="text-[10px] font-black text-slate-400 mr-1">추천 기준</span>
+                  {(['GENERAL', 'DISABLED', 'WOMEN', 'ELECTRIC', 'PREGNANT'] as VehicleType[]).map(type => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setVehicle({ ...vehicle, type });
+                        setPendingSlotId(null);
+                        setRecommendationNotice(`${slotTypeGuidance[type].title} 기준으로 추천 자리를 찾습니다.`);
+                      }}
+                      className={`px-3 py-2 rounded-full border text-[10px] font-black whitespace-nowrap ${vehicle.type === type ? `${slotTypeGuidance[type].badgeClass} ring-2 ring-offset-1 ring-slate-100` : 'bg-white text-slate-400 border-slate-100'}`}
+                    >
+                      {slotTypeMeta[type].label}
+                    </button>
+                  ))}
+                </div>
+             </div>
+
+             {recommendationNotice && (
+               <div className="mx-6 mb-4 rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-xs font-bold text-emerald-700">
+                 {recommendationNotice}
+               </div>
+             )}
+
              <div className="flex px-8 gap-2 mb-4 overflow-x-auto no-scrollbar">
                 {Array.from(new Set(selectedFacility.slots.map(s => s.floor))).map(floor => (
-                  <button key={floor} onClick={() => setActiveFloor(floor)} className={`min-w-[76px] py-3 rounded-2xl font-black text-xs transition-all ${activeFloor === floor ? 'bg-slate-900 text-white shadow-xl' : 'bg-slate-50 text-slate-400'}`}>
+                  <button key={floor} onClick={() => { setActiveFloor(floor); setRecommendationNotice(null); }} className={`min-w-[76px] py-3 rounded-2xl font-black text-xs transition-all ${activeFloor === floor ? 'bg-slate-900 text-white shadow-xl' : 'bg-slate-50 text-slate-400'}`}>
                     <span className="block">{floor}</span>
                     <span className="block text-[9px] opacity-70 mt-0.5">
                       {selectedFacility.slots.filter(slot => slot.floor === floor && !slot.isOccupied).length}대 가능
@@ -1340,7 +1507,7 @@ export default function App() {
                       <button 
                         key={slot.id}
                         disabled={slot.isOccupied}
-                        onClick={() => setPendingSlotId(slot.id)}
+                        onClick={() => { setPendingSlotId(slot.id); setRecommendationNotice(null); }}
                         className={`h-16 sm:h-20 rounded-xl sm:rounded-2xl border-b-4 flex flex-col items-center justify-center transition-all ${stateClass}`}
                       >
                          <span className="text-[8px] sm:text-[9px] font-black opacity-40 max-w-full truncate px-1">{slot.id.split('-').slice(-1)[0]}</span>
