@@ -1,0 +1,15 @@
+{
+  "name": "천안 스마트 주차",
+  "short_name": "천안주차",
+  "description": "천안시 공영·민영 주차장의 실시간 빈자리 확인, 내 차 위치 저장, 하이패스형 자동결제 서비스",
+  "lang": "ko",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B2447",
+  "theme_color": "#0B2447",
+  "icons": [
+    { "src": "/favicon/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
