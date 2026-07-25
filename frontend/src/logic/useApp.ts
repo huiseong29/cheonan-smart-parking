@@ -351,9 +351,9 @@ export function useApp() {
     newsModal: !!S.news,
     // home
     filters, markers, facilities, selFacObj,
-    sheetPeekShow: !S.sheet && !S.mapLoading, sheetList: S.sheet,
-    sheetStyle: `position:absolute;left:0;right:0;bottom:0;z-index:${S.sheet ? 60 : 25};background:var(--surface);border-top:1px solid var(--line);border-radius:26px 26px 0 0;box-shadow:var(--sheet-shadow);${S.sheet ? 'top:32%;display:flex;flex-direction:column' : ''}`,
+    sheet: S.sheet, sheetPeekShow: !S.sheet && !S.mapLoading, sheetList: S.sheet,
     toggleSheet: () => set((s) => ({ sheet: !s.sheet })),
+    setSheet: (open: boolean) => set({ sheet: open }),
     openDetail: () => set({ view: 'detail' }),
     sessionOnMap: !!S.session, parkMin: S.session ? S.session.min : 0,
     goPayConfirm: () => { fetchFee(); set({ pay: 'confirm' }); },

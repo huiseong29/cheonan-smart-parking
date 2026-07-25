@@ -5,7 +5,7 @@ import type { AppVals } from '../logic/useApp';
 export function NewsModal({ v }: { v: AppVals }) {
   return (
     <div onClick={v.closeNews} style={sx('position:absolute;inset:0;z-index:135;background:rgba(15,23,42,.4);display:flex;align-items:flex-end;padding:16px;animation:fadeIn .2s')}>
-      <div style={sx('width:100%;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
+      <div className="nb" style={sx('width:100%;max-height:100%;overflow-y:auto;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
         <div style={sx('display:flex;align-items:flex-start;justify-content:space-between;gap:12px')}>
           <div style={sx('min-width:0')}>
             <span style={sx(`display:inline-block;padding:.3em .55em;border-radius:8px;background:${v.curNewsTagBg};color:${v.curNewsTagColor};font-size:.66em;font-weight:var(--wt)`)}>{v.curNews.tag}</span>

@@ -4,7 +4,7 @@ import type { AppVals } from '../logic/useApp';
 
 export function SuccessScreen({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:110;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;text-align:center;animation:fadeIn .3s;overflow:hidden')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:110;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:40px 30px;text-align:center;animation:fadeIn .3s;overflow-x:hidden;overflow-y:auto')}>
       <div style={sx('position:absolute;top:-110px;left:50%;transform:translateX(-50%);width:340px;height:340px;border-radius:99em;background:var(--accent-soft);opacity:.55;pointer-events:none')} />
       <div style={sx('position:relative;width:7.6em;height:7.6em;display:flex;align-items:center;justify-content:center')}>
         <div style={sx('position:absolute;inset:0;border-radius:99em;background:var(--accent-soft);opacity:.5')} />

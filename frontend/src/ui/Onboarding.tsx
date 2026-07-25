@@ -4,9 +4,11 @@ import type { AppVals } from '../logic/useApp';
 
 export function Onboarding({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:120;background:var(--surface);display:flex;flex-direction:column;padding:28px 24px;animation:fadeIn .3s;overflow:hidden')}>
+    <div style={sx('position:absolute;inset:0;z-index:120;background:var(--surface);display:flex;flex-direction:column;animation:fadeIn .3s;overflow:hidden')}>
       <div style={sx('position:absolute;top:-90px;right:-70px;width:260px;height:260px;border-radius:99em;background:var(--accent-soft);opacity:.7;pointer-events:none')} />
       <div style={sx('position:absolute;top:96px;right:-24px;width:120px;height:120px;border-radius:99em;border:1.5px dashed var(--line-strong);opacity:.6;pointer-events:none')} />
+      {/* 글자 확대 등으로 내용이 뷰포트를 넘치면 스크롤 — 평소에는 기존과 동일 레이아웃 */}
+      <div className="nb" style={sx('flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;padding:28px 24px;position:relative')}>
       <div style={sx('flex:1;display:flex;flex-direction:column;gap:24px;padding-top:14px;position:relative')}>
         <div style={sx('display:flex;align-items:center;gap:12px')}>
           {/* 서비스 마크 — 파비콘과 동일한 심볼 사용 (SVG 자체 라운드 22%에 맞춰 클리핑) */}
@@ -92,6 +94,7 @@ export function Onboarding({ v }: { v: AppVals }) {
         </div>
       )}
       <button onClick={v.finishOnboarding} disabled={v.plateInvalid} style={sx(v.startBtnStyle)}>시작하기</button>
+      </div>
     </div>
   );
 }

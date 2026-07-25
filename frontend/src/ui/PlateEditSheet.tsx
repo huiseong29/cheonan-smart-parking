@@ -6,7 +6,7 @@ export function PlateEditSheet({ v }: { v: AppVals }) {
   return (
     <>
       <div onClick={v.closePlateEdit} style={sx('position:absolute;inset:0;z-index:150;background:rgba(15,23,42,.45);animation:fadeIn .2s')} />
-      <div style={sx('position:absolute;left:0;right:0;bottom:0;z-index:151;background:var(--surface);border-radius:26px 26px 0 0;padding:22px 22px 26px;box-shadow:var(--sheet-shadow);animation:riseIn .28s ease-out')}>
+      <div className="nb" style={sx('position:absolute;left:0;right:0;bottom:0;z-index:151;max-height:100%;overflow-y:auto;background:var(--surface);border-radius:26px 26px 0 0;padding:22px 22px 26px;box-shadow:var(--sheet-shadow);animation:riseIn .28s ease-out')}>
         <h3 style={sx('margin:0;font-size:1.05em;font-weight:var(--wt);color:var(--ink)')}>차량번호 변경</h3>
         <p style={sx('margin:6px 0 0;font-size:.78em;font-weight:var(--wb);color:var(--ink-2)')}>번호가 틀리면 주차 조회와 자동 결제가 되지 않아요</p>
         <div style={sx('margin-top:16px')}>

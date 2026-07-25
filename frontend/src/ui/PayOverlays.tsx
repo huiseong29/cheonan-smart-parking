@@ -61,7 +61,7 @@ export function PayConfirmOverlay({ v }: { v: AppVals }) {
 /** 결제 처리 중 스피너 모달 */
 export function PayingModal({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:144;background:rgba(15,23,32,.45);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:144;background:rgba(15,23,32,.45);display:flex;align-items:safe center;justify-content:center;overflow-y:auto;animation:fadeIn .2s')}>
       <div style={sx('background:var(--surface);border-radius:var(--r-card);padding:26px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 16px 40px rgba(16,24,40,.25);min-width:11em')}>
         <svg width="2em" height="2em" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.4" strokeLinecap="round" style={sx('animation:spin .8s linear infinite')}><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>
         <div style={sx('text-align:center')}>
@@ -77,7 +77,7 @@ export function PayingModal({ v }: { v: AppVals }) {
 /** 결제 실패 (card/limit) */
 export function PayFailedScreen({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:143;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;animation:fadeIn .25s;overflow:hidden')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:143;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:36px 28px;text-align:center;animation:fadeIn .25s;overflow-x:hidden;overflow-y:auto')}>
       <div style={sx('position:relative;width:6.6em;height:6.6em;display:flex;align-items:center;justify-content:center')}>
         <div style={sx('position:absolute;inset:0;border-radius:99em;background:#FCEEEE;opacity:.6')} />
         <div style={sx('position:absolute;inset:1em;border-radius:99em;background:#FCEEEE')} />
@@ -102,7 +102,7 @@ export function PayFailedScreen({ v }: { v: AppVals }) {
 /** 결제 지연(승인 미확정) */
 export function PayPendingScreen({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:143;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;animation:fadeIn .25s;overflow:hidden')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:143;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:36px 28px;text-align:center;animation:fadeIn .25s;overflow-x:hidden;overflow-y:auto')}>
       <div style={sx('position:relative;width:6.6em;height:6.6em;display:flex;align-items:center;justify-content:center')}>
         <div style={sx('position:absolute;inset:0;border-radius:99em;background:#FBF3E3;opacity:.6')} />
         <div style={sx('position:absolute;inset:1em;border-radius:99em;background:#FBF3E3')} />
@@ -131,7 +131,7 @@ export function PayPendingScreen({ v }: { v: AppVals }) {
 /** 결제 완료 (출차 유예 30분 카운트다운) */
 export function PayCompleteScreen({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:145;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;animation:fadeIn .3s;overflow:hidden')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:145;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:36px 28px;text-align:center;animation:fadeIn .3s;overflow-x:hidden;overflow-y:auto')}>
       <div style={sx('position:absolute;top:-110px;left:50%;transform:translateX(-50%);width:340px;height:340px;border-radius:99em;background:var(--ok-soft);opacity:.55;pointer-events:none')} />
       <div style={sx('position:relative;width:7.4em;height:7.4em;display:flex;align-items:center;justify-content:center')}>
         <div style={sx('position:absolute;inset:0;border-radius:99em;background:var(--ok-soft);opacity:.5')} />

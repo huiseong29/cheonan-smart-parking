@@ -6,7 +6,7 @@ export function ResumeModal({ v }: { v: AppVals }) {
   return (
     <>
       <div style={sx('position:absolute;inset:0;z-index:150;background:rgba(15,23,42,.45);animation:fadeIn .2s')} />
-      <div style={sx('position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);z-index:151;background:var(--surface);border-radius:var(--r-card);padding:24px 22px;box-shadow:0 18px 44px rgba(15,23,42,.28);animation:riseIn .28s ease-out;text-align:center')}>
+      <div className="nb" style={sx('position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%);z-index:151;max-height:calc(100% - 36px);overflow-y:auto;background:var(--surface);border-radius:var(--r-card);padding:24px 22px;box-shadow:0 18px 44px rgba(15,23,42,.28);animation:riseIn .28s ease-out;text-align:center')}>
         {v.resumeChecking && (<>
           <div style={sx('width:2.6em;height:2.6em;margin:0 auto;border-radius:99px;border:3px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite')} />
           <h3 style={sx('margin:14px 0 0;font-size:.98em;font-weight:var(--wt);color:var(--ink)')}>지난 결제 결과를 확인하고 있어요</h3>

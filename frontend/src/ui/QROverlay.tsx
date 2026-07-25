@@ -4,7 +4,7 @@ import type { AppVals } from '../logic/useApp';
 
 export function QROverlay({ v }: { v: AppVals }) {
   return (
-    <div style={sx('position:absolute;inset:0;z-index:150;background:#0E1116;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;animation:fadeIn .25s')}>
+    <div className="nb" style={sx('position:absolute;inset:0;z-index:150;background:#0E1116;display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:30px;animation:fadeIn .25s;overflow-x:hidden;overflow-y:auto')}>
       <button onClick={v.closeQR} style={sx('position:absolute;top:16px;right:16px;width:2.4em;height:2.4em;border-radius:var(--r-btn);background:rgba(255,255,255,.14);border:none;color:#fff;display:flex;align-items:center;justify-content:center')}><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
       <p style={sx('margin:0 0 6px;color:#fff;font-size:1em;font-weight:var(--wt)')}>여행지원 QR 스캔</p>
       <p style={sx('margin:0 0 24px;color:rgba(255,255,255,.6);font-size:.78em;font-weight:var(--wb);text-align:center;line-height:1.5')}>관광지·행사장의 QR 코드를<br />사각형 안에 맞춰 주세요</p>

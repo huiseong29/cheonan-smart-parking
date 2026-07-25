@@ -5,7 +5,7 @@ import type { AppVals } from '../logic/useApp';
 export function CardModal({ v }: { v: AppVals }) {
   return (
     <div onClick={v.closeCard} style={sx('position:absolute;inset:0;z-index:150;background:rgba(15,23,42,.4);display:flex;align-items:flex-end;padding:16px;animation:fadeIn .2s')}>
-      <div style={sx('width:100%;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
+      <div className="nb" style={sx('width:100%;max-height:100%;overflow-y:auto;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
         <div style={sx('display:flex;align-items:center;justify-content:space-between;margin-bottom:16px')}>
           <h3 style={sx('margin:0;font-size:1.08em;font-weight:var(--wt);color:var(--ink)')}>천안사랑카드 연동</h3>
           <button onClick={v.closeCard} style={sx('width:2.2em;height:2.2em;border-radius:var(--r-btn);background:var(--bg);border:none;color:var(--ink-2);display:flex;align-items:center;justify-content:center')}><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>

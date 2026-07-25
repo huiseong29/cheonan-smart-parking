@@ -5,7 +5,7 @@ import type { AppVals } from '../logic/useApp';
 export function SlotModal({ v }: { v: AppVals }) {
   return (
     <div onClick={v.closeSlot} style={sx('position:absolute;inset:0;z-index:130;background:rgba(15,23,42,.4);display:flex;align-items:flex-end;padding:16px;animation:fadeIn .2s')}>
-      <div style={sx('width:100%;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
+      <div className="nb" style={sx('width:100%;max-height:100%;overflow-y:auto;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
         <div style={sx('display:flex;align-items:flex-start;gap:12px')}>
           <div style={sx(`flex:none;width:3em;height:3em;border-radius:var(--r-btn);background:${v.selTintSoft};color:${v.selTint};display:flex;align-items:center;justify-content:center`)}>
             <svg width="1.4em" height="1.4em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>

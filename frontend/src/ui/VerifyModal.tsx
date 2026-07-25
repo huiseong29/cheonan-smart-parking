@@ -5,7 +5,7 @@ import type { AppVals } from '../logic/useApp';
 export function VerifyModal({ v }: { v: AppVals }) {
   return (
     <div onClick={v.closeVerify} style={sx('position:absolute;inset:0;z-index:135;background:rgba(15,23,42,.4);display:flex;align-items:flex-end;padding:16px;animation:fadeIn .2s')}>
-      <div onClick={v.stopProp} style={sx('width:100%;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
+      <div onClick={v.stopProp} className="nb" style={sx('width:100%;max-height:100%;overflow-y:auto;background:var(--surface);border-radius:var(--r-card);padding:20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);animation:riseIn .25s ease-out')}>
         <div style={sx('display:flex;align-items:flex-start;gap:12px')}>
           <div style={sx(`flex:none;width:3em;height:3em;border-radius:var(--r-btn);background:${v.vSoft};color:${v.vColor};display:flex;align-items:center;justify-content:center`)}>
             <svg width="1.4em" height="1.4em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>

@@ -1,11 +1,74 @@
-/** 지도 홈 — 원본 isHome 블록 1:1 (지도 SVG · 검색/필터 · 마커 · 바텀시트 · 길안내 · 주차중 배너) */
+/** 지도 홈 — 지도 SVG · 검색/필터 · 마커 · 드래그 바텀시트 · 길안내 · 주차중 배너 */
+import { useRef, useState } from 'react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { sx } from '../lib/css';
 import type { AppVals } from '../logic/useApp';
 
 /** 바텀시트 스켈레톤 shimmer 공통 배경 */
 const sh = 'background:linear-gradient(90deg,var(--bg) 25%,#EDF1F5 50%,var(--bg) 75%);background-size:200% 100%;animation:shimmer 1.3s linear infinite';
 
+// 바텀시트 스냅 파라미터
+const EXPANDED_TOP = '32%';      // 펼친 상태 상단 위치
+const PEEK_EM = 6;               // 접힘 상태에서 노출할 높이(em) — 글자 크기에 따라 peek 콘텐츠와 함께 스케일
+const SNAP_VELOCITY = 0.5;       // px/ms 이상 플릭이면 속도 방향으로 스냅
+
+/** 손가락을 따라 움직이고 놓으면 가까운 스냅 지점으로 애니메이션되는 바텀시트 훅 */
+function useSheetDrag(v: AppVals) {
+  const ref = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ startY: number; startPx: number; max: number; lastY: number; lastT: number; vy: number; lastPx: number; moved: boolean } | null>(null);
+  const [dragPx, setDragPx] = useState<number | null>(null);
+  const dragging = dragPx !== null;
+
+  const down = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const em = parseFloat(getComputedStyle(el).fontSize) || 16;
+    const max = Math.max(0, el.offsetHeight - PEEK_EM * em); // 접힘 위치까지의 이동 거리(px)
+    const startPx = v.sheet ? 0 : max;
+    drag.current = { startY: e.clientY, startPx, max, lastY: e.clientY, lastT: performance.now(), vy: 0, lastPx: startPx, moved: false };
+    // 캡처는 이벤트가 바인딩된 핸들(currentTarget)에 — 손가락이 핸들을 벗어나도 move/up 유지
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const move = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const delta = e.clientY - d.startY;
+    if (Math.abs(delta) > 4) d.moved = true;
+    const now = performance.now();
+    const dt = now - d.lastT;
+    if (dt > 0) { d.vy = (e.clientY - d.lastY) / dt; d.lastY = e.clientY; d.lastT = now; }
+    let px = d.startPx + delta;
+    if (px < 0) px *= 0.3;                         // 위쪽 고무줄
+    else if (px > d.max) px = d.max + (px - d.max) * 0.3; // 아래쪽 고무줄
+    d.lastPx = px;
+    setDragPx(px);
+  };
+  const up = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+    if (!d.moved) { setDragPx(null); v.toggleSheet(); return; } // 탭 → 토글
+    const open = Math.abs(d.vy) > SNAP_VELOCITY ? d.vy < 0 : d.lastPx < d.max / 2;
+    setDragPx(null);
+    v.setSheet(open);
+  };
+
+  const style: CSSProperties = {
+    position: 'absolute', left: 0, right: 0, top: EXPANDED_TOP, bottom: 0,
+    zIndex: v.sheet ? 60 : 25,
+    background: 'var(--surface)', borderTop: '1px solid var(--line)',
+    borderRadius: '26px 26px 0 0', boxShadow: 'var(--sheet-shadow)',
+    display: 'flex', flexDirection: 'column',
+    transform: dragging ? `translateY(${dragPx}px)` : (v.sheet ? 'translateY(0)' : `translateY(calc(100% - ${PEEK_EM}em))`),
+    transition: dragging ? 'none' : 'transform .36s cubic-bezier(.32,.72,0,1)',
+    willChange: 'transform',
+  };
+  return { ref, style, dragging, handlers: { onPointerDown: down, onPointerMove: move, onPointerUp: up, onPointerCancel: up } };
+}
+
 export function HomeScreen({ v }: { v: AppVals }) {
+  const sheet = useSheetDrag(v);
   return (
     <div style={sx('position:relative;flex:1;min-height:0')}>
       {/* 지도 배경 SVG */}
@@ -54,16 +117,19 @@ export function HomeScreen({ v }: { v: AppVals }) {
         </button>
       ))}
 
-      {/* 바텀시트 */}
-      <div style={sx(v.sheetStyle)}>
-        <div onClick={v.toggleSheet} style={sx('padding:9px 0 4px;display:flex;justify-content:center')}><div style={sx('width:38px;height:4px;border-radius:99px;background:var(--line-strong)')} /></div>
-        {v.peekLoading && (
+      {/* 바텀시트 (드래그로 펼치기/접기) */}
+      <div ref={sheet.ref} style={sheet.style}>
+        {/* 드래그 그랩 영역 — 세로 제스처가 지도로 새지 않도록 touch-action:none */}
+        <div {...sheet.handlers} style={{ padding: '9px 0 6px', display: 'flex', justifyContent: 'center', flex: 'none', cursor: 'grab', touchAction: 'none' }}>
+          <div style={sx('width:38px;height:4px;border-radius:99px;background:var(--line-strong)')} />
+        </div>
+        {v.peekLoading && !sheet.dragging && (
           <div style={sx('padding:4px 20px 20px;display:flex;align-items:center;gap:12px')}>
             <div style={sx('flex:1;display:flex;flex-direction:column;gap:9px')}><div style={sx(`width:62%;height:1.05em;border-radius:6px;${sh}`)} /><div style={sx(`width:84%;height:.8em;border-radius:6px;${sh}`)} /></div>
             <div style={sx(`flex:none;width:6.2em;height:2.6em;border-radius:var(--r-btn);${sh}`)} />
           </div>
         )}
-        {v.sheetPeekShow && (
+        {v.sheetPeekShow && !sheet.dragging && (
           <div style={sx('padding:4px 20px 20px;display:flex;align-items:center;gap:12px')}>
             <div style={sx('flex:1;min-width:0')}>
               <div style={sx('display:flex;align-items:center;gap:8px')}>
@@ -75,7 +141,7 @@ export function HomeScreen({ v }: { v: AppVals }) {
             <button onClick={v.openDetail} style={sx('flex:none;background:var(--accent);color:#fff;border:none;border-radius:var(--r-btn);padding:.7em 1.1em;font-size:.85em;font-weight:var(--ws)')}>층별 보기</button>
           </div>
         )}
-        {v.sheetList && (
+        {(v.sheetList || sheet.dragging) && (
           <div className="nb" style={sx('padding:2px 18px 24px;overflow-y:auto;max-height:calc(100% - 30px)')}>
             <div style={sx('display:flex;align-items:center;justify-content:space-between;margin:6px 4px 12px')}>
               <p style={sx('margin:0;font-size:.8em;font-weight:var(--ws);color:var(--ink-3)')}>주변 주차장 {v.facCountText}</p>
