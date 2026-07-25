@@ -10,3 +10,6 @@ coverage/
 .npm-cache/
 .env*
 !.env.example
+
+# 내부 작업 문서 (임시 제외)
+docs/
